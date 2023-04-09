@@ -1,0 +1,11 @@
+.DS_Store
+.idea
+
+mariadb/data/*
+!mariadb/data/.gitkeep
+nginx/logs/*
+!nginx/logs/.gitkeep
+php/logs/*
+!php/logs/.gitkeep
+
+docker-compose.override.yml

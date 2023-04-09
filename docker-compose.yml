@@ -1,0 +1,77 @@
+version: '3.9'
+
+networks:
+  wordpress:
+
+services:
+  webserver:
+    build:
+      context: ./nginx
+    container_name: nginx
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./www:/var/www/html:delegated
+      - ./nginx/logs:/var/log/nginx
+    depends_on:
+      - php
+      - mysql
+      - phpmyadmin
+    networks:
+      - wordpress
+
+  mysql:
+    build:
+      context: ./mariadb
+    container_name: mysql
+    restart: always
+    ports:
+      - 3306:3306
+    volumes:
+      - ./mariadb/data:/var/lib/mysql
+      - ./mariadb/logs:/var/log/mysql:rw
+    environment:
+      MYSQL_DATABASE: wp_db
+      MYSQL_USER: wp_user
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: secret
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    networks:
+      - wordpress
+
+  php:
+    build:
+      context: ./php
+    container_name: php
+    volumes:
+      - ./www:/var/www/html:delegated
+      - ./php/logs:/var/log/php:rw
+    networks:
+      - wordpress
+
+  wp:
+    build:
+      context: ./php
+    container_name: wp
+    entrypoint: ['wp', '--allow-root']
+    volumes:
+      - ./www:/var/www/html:delegated
+    networks:
+      - wordpress
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: phpmyadmin
+    depends_on:
+      - mysql
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: secret
+    ports:
+      - '8080:80'
+    networks:
+      - wordpress

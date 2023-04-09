@@ -1,0 +1,30 @@
+version: "3.9"
+
+services:
+
+    webserver:
+      depends_on:
+        - php
+        - mysql
+        - phpmyadmin
+        - adminer
+        - mailpit
+
+    adminer:
+        image: adminer:latest
+        restart: always
+        ports:
+          - 8085:8080
+        depends_on:
+          - mysql
+        networks:
+          - wordpress
+
+    mailpit:
+        image: axllent/mailpit:latest
+        ports:
+          - 1025:1025 # smtp server
+          - 8025:8025 # web ui
+        networks:
+          - wordpress
+
